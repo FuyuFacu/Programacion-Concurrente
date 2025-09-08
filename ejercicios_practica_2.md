@@ -388,31 +388,136 @@ Process Persona[0..N-1]
 b)
 
 ```java
-sem mutex = 0;
+cola C;
+sem mutex = 1, esp[N] = ([N] 0);
 
-
-Process Persona[1..N]
+Process Persona[id: 0..N-1]
 {
-    while (true)
+    while(true)
     {
-        P(mutex)
-        if (libre = true) libre = false; V(mutex)
-        else
-            --cargar documento
-            push(C, documento);
-            V(mutex);
-        
-        if (C.notEmpty())
-            pop(C, documento);
-            --imprimir documento;
-        else
-            libre = true;
-    }
+        P(mutex);
+        if (not libre) {
+            push(C, id);
+            V(mutex); P(esp[id]); }
+        libre = false;
 
+        imprimir(documento);
+        
+        if (not empty (C)) { pop(C, aux)
+            V(esp[aux]);}
+
+    }
 }
 
+```
+
+c)
+
+```java
+esp[N] = ([N] 0);
+
+Process Persona[id: 0..N-1]
+{
+    if (not id = 0){
+        P[esp[id-1]];
+    }
+
+    imprimir(documento);
+        
+    V(esp[id]);
+}
 
 ```
+
+d)
+
+```java
+cola C;
+sem mutex = 1
+sem disponible = 1;
+sem hayPersona = 0;
+turno[N] = ([N], 0);
+
+Process Persona[id: 0..N-1]
+{
+    while(true)
+    {
+        P(mutex);
+        push(C, id);
+        V(mutex);
+        V(hayPersona);
+
+        P(turno[id]);
+        imprimir(documento);
+
+        V(disponible);
+
+    }
+}
+
+Process Coordinador
+{ while (true)
+    {
+        P(hayPersona);
+        P(disponible);
+        aux = C.pop();
+        V(turno[aux]);
+    }
+}
+```
+
+e)
+
+```java
+cola impresoras = {0,1,2,3,4}
+cola C;
+sem mutex = 1
+sem disponibles = 5;
+sem hayPersona = 0;
+sem turno[N] = ([N], 0);
+Impresora asignada[N] = ([N], 0);
+
+Process Persona[id: 0..N-1]
+{
+    while(true)
+    {
+        P(mutex);
+        push(C, id);
+        V(mutex);
+
+        V(hayPersona); // Necesario para que empieze a chambear el coordinador.
+
+        P(turno[id]); // Espero a que se pueda imprimir y tenga asignada ya una impresora.
+        imprimir(documento, asignada[id]); 
+        push(C, asignada[id]); // Vuelvo a pushear la impresora. Ya la he utilizado.
+
+        V(disponible);
+
+    }
+}
+
+Process Coordinador
+{ while (true)
+    {
+        P(hayPersona); // Aca verifico que existe una persona esperando a imprimir
+        P(disponible); // Verifico que haya disponibilidad de impresoras
+
+        id = C.pop();   // consigo el id de la persona
+        impresora = impresoras.pop();   // desencolo alguna de las impresoras disponibles en la cola
+        asignada[id] = impresora;   // asigno al id del array la impresora
+        V(turno[id]);   //Libero a la Persona con el id pertinente
+    }
+}
+```
+
+
+
+7)
+
+
+
+
+
 
 
 
