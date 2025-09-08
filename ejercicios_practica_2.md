@@ -125,9 +125,7 @@ Process Control[id: 0..3]
 			println("Id's del error critico");
 			println(aux.id);
 		}
-		// despues lo analizo maniana
 		V(mutex);
-		// Aca es la seccion no critica, por eso libero el recurso, pero lo demas como gravedad o el id se deben imprimir y no mutar en el momento en el que se hace
 		
 		if (gravedad == id) contador++;
 		puntero++;
@@ -136,6 +134,7 @@ Process Control[id: 0..3]
 	resultados[id] = contador;
 	V(mutex)
 }
+
 struct Error
 {
 	int id;
@@ -234,8 +233,190 @@ Process Usuario-Baja [I:1..K]:
     V(total);   // libera total
     V(baja);    // libera baja
 }
+```
+
+5)
+
+```java
+typeP buf[N]
+int ocupado = 0;
+int libre = 0
+sem lleno = 0;
+sem vacio = 0;
+lleno = 0;
+
+
+Process Preparador
+{ while (true)
+    { 
+        Paquete p = --generar paquete
+        P(vacio) buf[libre] = p, libre += 1 mod n, V(lleno);
+
+    }
+}
+
+Process Entregador 
+{ while (true)
+    { P(lleno);
+      resultado = buff[ocupado], ocupado += 1 mod n, V(vacio);
+      --entregar resultado;
+    }
+}
 
 ```
+
+---
+
+b)
+
+```java
+typeP buf[N]
+sem mutex = 1;
+int ocupado = 0;
+int libre = 0
+sem lleno = 0;
+sem vacio = 0;
+lleno = 0;
+
+
+Process Preparador[0..P-1]
+{ while (true)
+    { 
+        Paquete p = --generar paquete
+        P(mutex);
+        P(vacio) buf[libre] = p, libre += 1 mod n, V(lleno);
+        V(mutex);
+    }
+}
+
+Process Entregador 
+{ while (true)
+    { P(lleno);
+      resultado = buff[ocupado], ocupado += 1 mod n, V(vacio);
+      --entregar resultado;
+    }
+}
+
+```
+
+
+c)
+
+```java
+typeP buf[N]
+sem mutex = 1;
+int ocupado = 0;
+int libre = 0
+sem lleno = 0;
+sem vacio = 0;
+lleno = 0;
+
+
+Process Preparador[0..P-1]
+{ while (true)
+    { 
+        Paquete p = --generar paquete
+        P(vacio) buf[libre] = p, libre += 1 mod n, V(lleno);
+    }
+}
+
+Process Entregador 
+{ while (true)
+    { P(lleno);
+      P(mutex);
+      resultado = buff[ocupado], ocupado += 1 mod n, V(vacio);
+      V(mutex);
+      --entregar resultado;
+    }
+}
+
+```
+
+
+d)
+
+```java
+typeP buf[N]
+sem mutex = 1;
+int ocupado = 0;
+int libre = 0
+sem lleno = 0;
+sem vacio = 0;
+lleno = 0;
+
+
+Process Preparador[0..P-1]
+{ while (true)
+    { 
+        Paquete p = --generar paquete
+        P(mutex);
+        P(vacio) buf[libre] = p, libre += 1 mod n, V(lleno);
+        V(mutex);
+    }
+}
+
+Process Entregador 
+{ while (true)
+    { P(lleno);
+      P(mutex);
+      resultado = buff[ocupado], ocupado += 1 mod n, V(vacio);
+      V(mutex);
+      --entregar resultado;
+    }
+}
+
+```
+
+6)
+a)
+
+```java
+sem impresora = 1;
+
+Process Persona[0..N-1]
+{ while (true)
+    {
+        --generar documento
+        P(impresora);
+        imprimir(documento);
+        V(impresora);
+    }
+}
+
+```
+
+b)
+
+```java
+sem mutex = 0;
+
+
+Process Persona[1..N]
+{
+    while (true)
+    {
+        P(mutex)
+        if (libre = true) libre = false; V(mutex)
+        else
+            --cargar documento
+            push(C, documento);
+            V(mutex);
+        
+        if (C.notEmpty())
+            pop(C, documento);
+            --imprimir documento;
+        else
+            libre = true;
+    }
+
+}
+
+
+```
+
+
+
+
 
 
 
