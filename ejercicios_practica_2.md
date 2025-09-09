@@ -511,6 +511,7 @@ Process Coordinador
 ```
 
 7)
+```java
 int asignada[N] = ([N], 0);
 int terminados[N] = ([N], 0);
 sem listo[N] = ([N], 0);
@@ -524,7 +525,7 @@ sem terminado = 0;
 Cola c;
 
 
-```java
+
 Process Alumno[id: 1..A]
 {
     int numero_tarea;
