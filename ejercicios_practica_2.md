@@ -510,15 +510,121 @@ Process Coordinador
 }
 ```
 
-
-
 7)
+int asignada[N] = ([N], 0);
+int terminados[N] = ([N], 0);
+sem listo[N] = ([N], 0);
+int orden = 0;
 
 
 
+int contador = 0;
+sem comenzar = 0;
+sem terminado = 0;
+Cola c;
+
+
+```java
+Process Alumno[id: 1..A]
+{
+    int numero_tarea;
+    numero_tarea = elegirTarea();
+
+    P(mutex);
+    asignada[numero_tarea]++;
+    contador++;
+    if (contador == A)
+        { for i = 1..A V(barrera)}
+    V(mutex);
+    P(barrera);
+
+    --realizar tarea 
+
+    P(mutex);
+    terminado++;
+    c.encolar(numero_tarea);
+    V(mutex);
+
+    P(listo[numero_tarea]);
+
+
+}
+
+
+Process Profesor {
+    while (true)
+    { 
+        P(terminado);
+        P(mutex);
+        numero_tarea = c.desencolar();
+        terminados[numero_tarea]++;
+        V(mutex);
+
+        if (asignada[numero_tarea] == terminados[numero_tarea])
+        {
+            P(mutex);
+            orden++;
+            V(mutex);
+
+            otorgar_puntaje(orden);
+            for i = 1..asignada[numero_tarea]
+                V(listo[numero_tarea]);
+
+        }
+    }
+}
+
+```
+
+
+8)
+```java
+sem barrera = 0;
+int cant_id[N] = ([N], 0);
+sem cantidad_piezas = T;
+
+Process Empleado[id: 1.. E]
+{   
+    P(mutex);
+    contador++;
+    if (contador == E)
+        for i: 1 to E V(barrera);
+    V(mutex);
+    P(barrera);
+
+    while (true)
+    {
+        if (not P(cantidad_piezas)) break; // Creo que no esta bien hacerlo de esta manera...
+        P(cantidad_piezas);
+        --fabricar pieza;
+
+        P(mutex);
+        cant_id[id]++;
+        V(mutex);
+    }
+
+    P(mutex);
+        finalizado++
+        if (finalizado == E) 
+            V(terminado);
+    V(mutex);
+}
 
 
 
+Process Dia {
+    P(terminado);
+    int maximo = -1;
+    int id_max = 1;
+    for i: 1 to E {
+       if cant_id[i] > max {
+            max = cant_id[i]; 
+            id_max = i;
+       }
+    } 
+    informar_mayor_productor(id_max);
+}
+```
 
 
 
