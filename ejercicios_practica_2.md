@@ -629,6 +629,85 @@ Process Dia {
 
 
 
+9)
+```java
+    
+    sem mutex = 1;
+    sem ocupado = 1;
+
+    // Variables necesarias para el buffer del almacen del marco
+    int ocupadoMarco = 0;
+    int libreMarco = 0;
+    sem vacioMarco = m;
+    int llenoMarco = 0;
+    typeT buffM[m];
+
+    int ocupadoVidrio = 0;
+    int libreVidrio = 0;
+    int vacioVidrio = v;
+    int llenoVidrio = 0;
+    typeT buffV[v];
+
+    Process Carpintero[id: 1..4] 
+    {while (true)
+        {
+            P(mutex);
+            Marco marco = --producir marco;
+            P(vacioMarco); buffM[libreMarco] = marco; libreMarco = (libreMarco + 1) mod m; V(llenoMarco);
+            V(mutex);
+        }
+    }
+
+    Process Vidriero[id]
+    {while (true)
+        {
+            Vidrio vidrio = --producir vidrio;
+
+            P(vacioVidrio);
+            buffV[libreVidrio] = vidrio;
+            libreVidrio = (libreVidrio + 1) mod n;
+            V(llenoVidrio);
+
+        }
+
+    }
+
+    Process Armador[id: 1..2]
+    {
+        P(llenoMarco); 
+        P(llenoVidrio);
+
+        P(ocupado);
+        Marco = buf[ocupadoMarco]; 
+        ocupadoMadera = (ocupadoMadera + 1) mod nM; 
+
+        Vidrio = buff[ocupadoVidrio];
+        ocupadoVidrio = (ocupadoVidrio + 1) mod nV;
+
+        armarVentana(Marco, Vidrio);
+        V(ocupado);
+
+        V(vacioVidrio);
+        V(vacioMadera);
+
+    }
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
