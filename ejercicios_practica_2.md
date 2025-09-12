@@ -793,7 +793,44 @@ Process Camion[id: 0.. T+M]
 
 ```
 
+11)
+```java
+sem mutex = 1;
+sem disponible = 0;
+int cantidad = 0;
+int atendidos = 0;
+int asignada[50] = ([50], 0);
 
+Process Persona[id: 1..50]
+{
+    P(mutex);
+    c.push(id);
+    cantidad++;
+
+    if (cantidad == 5)
+    {
+        V(disponible);
+        cantidad = 0;
+    }
+    V(mutex);
+    P(asignada[id])
+
+}
+
+Process Empleado 
+{ while (atendidos <> 50)
+    {
+        P(disponbile);
+        for i:= 1..5 
+        {
+            id = c.pop();
+            atender_paciente(id);
+            atendidos++;
+            V(asignada[id]);
+        }
+    }
+}
+```
 
 
 
