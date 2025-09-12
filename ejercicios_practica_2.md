@@ -698,6 +698,100 @@ Process Dia {
 
 ```
 
+10)
+
+
+a)
+```java
+sem Limite = 7;
+sem Trigo = 5;
+sem Maiz = 5;
+sem Disponible = 0;
+asignada[T+M] = ([T+N], 0);
+
+Cola c;
+
+
+Process CamionTrigo[id: 0..T-1] {
+    P(mutex);
+    c.push(id);
+    V(mutex);
+
+    V(disponible);
+    P(asignada[id]);
+
+    P(mutex);
+    --descargar
+    V(mutex);
+    
+    V(Trigo);
+    V(Limite);
+}
+
+Process CamionMaiz[id: T..M-1];
+    P(mutex);
+    c.push(id);
+    V(mutex);
+
+    V(disponible);
+    P(asignada[id]);
+
+    P(mutex);
+    --descargar 
+    V(mutex);
+
+    V(Maiz);
+    V(Limite);
+}
+
+Process Coordinador 
+{ while(true) // Quiero saber si deberia poner algun limite cuando todos los camiones hayan descargado
+    { P(disponible);
+      P(mutex);
+      id = c.dequeue();
+      V(mutex);
+        
+      P(Limite);
+      if (esTrigo(id))
+      {
+        P(Trigo);
+        V(asignada[id]);
+
+      } else if (esMaiz(id))
+      {
+        P(Maiz);
+        V(asignada[id]);
+      }
+    }
+}
+
+```
+
+b)
+
+```java
+sem Limite = 7;
+sem Trigo = 5;
+sem Maiz = 5;
+
+Process Camion[id: 0.. T+M]
+{
+    P(Limite);
+    if esTrigo() {
+        P(Trigo);
+        --descargar
+        V(Trigo);
+    }
+    else if esMaiz() 
+    {
+        P(Maiz);
+        --descargar
+        V(Maiz);
+    }
+    V(Limite);
+}
+
+```
 
 
 
