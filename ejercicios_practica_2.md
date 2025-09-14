@@ -832,6 +832,120 @@ Process Empleado
 }
 ```
 
+12)
+
+a)
+```java
+cola c1;
+cola c2;
+cola c3;
+cola colaEspera;
+asignada[1..3] = ([N], 0);
+asignados[1..150] = ([N], 0);
+sem mutex = 1;
+
+
+Process Pasajero[id: 1..150]
+{
+    P(mutex);
+    colaEspera.add(id);
+    V(mutex);
+
+    V(disponible);
+    P(asignados[id]);
+}
+
+Process Recepcionista[]
+{
+    while true() {
+        P(disponible);
+        id = colaEspera.pop();
+
+        if (c1.size() < c2.size) && (c1.size() < c3.size()) {
+            P(mutex);
+            c1.add(id);
+            V(mutex);
+            asignada[1]++;
+        }
+        else if (c2.size() < c1.size()) && (c2.size() < c3.size()) {
+            P(mutex);
+            c2.add(id);
+            asignada[2]++;
+            V(mutex);
+        } else {
+            P(mutex);
+            c3.add(id);
+            asignada[3]++;
+            V(mutex);
+        }
+    }
+}
+
+
+Process Enfermera[id: 1..3]
+{
+    while (true) {
+        P(asignada[id]);
+
+        if id == 1: paciente = c1.pop()
+        if id == 2: paciente = c2.pop()
+        if id == 3: paciente = c3.pop()
+
+        Hisopar(paciente);
+
+        V(asignados[paciente]); // despierta al pasajero
+    }
+}
+
+```
+
+b)
+
+```java
+cola c1;
+cola c2;
+cola c3;
+asignada[1..3] = ([N], 0);
+asignados[1..150] = ([N], 0);
+sem mutex = 1;
+
+
+Process Pasajero[id: 1..150]
+{
+    P(mutex);
+
+    if (c1.size() <= c2.size()) && (c1.size() <= c3.size()): 
+        c1.add(id)
+        V(asignada[1]);
+    else if (c2.size() <= c1.size()) && (c2.size() <= c3.size()): 
+        c2.add(id)
+        V(asignada[2]);
+    else: 
+        c3.add(id)
+        V(asignada[3]);
+
+    V(mutex);
+
+    P(asignados[id]); // espera a ser atendido
+}
+
+
+Process Enfermera[id: 1..3]
+{
+    while (true) {
+        P(asignada[id]);
+
+        if id == 1: paciente = c1.pop()
+        if id == 2: paciente = c2.pop()
+        if id == 3: paciente = c3.pop()
+
+        Hisopar(paciente);
+
+        V(asignados[paciente]); // despierta al pasajero
+    }
+}
+
+```
 
 
 
