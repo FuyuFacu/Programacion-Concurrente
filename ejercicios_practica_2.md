@@ -512,17 +512,16 @@ Process Coordinador
 
 7)
 ```java
-int asignada[N] = ([N], 0);
 int terminados[N] = ([N], 0);
 sem listo[N] = ([N], 0);
+int puntaje_tarea[10] = ([10], 0);
 int orden = 0;
-
-
 
 int contador = 0;
 sem comenzar = 0;
 sem terminado = 0;
 Cola c;
+
 
 
 
@@ -532,7 +531,6 @@ Process Alumno[id: 1..A]
     numero_tarea = elegirTarea();
 
     P(mutex);
-    asignada[numero_tarea]++;
     contador++;
     if (contador == A)
         { for i = 1..A V(barrera)}
@@ -542,12 +540,12 @@ Process Alumno[id: 1..A]
     --realizar tarea 
 
     P(mutex);
-    terminado++;
     c.encolar(numero_tarea);
+    V(terminado);
     V(mutex);
 
     P(listo[numero_tarea]);
-
+    puntaje = puntaje_tarea[numero_tarea];
 
 }
 
@@ -561,20 +559,15 @@ Process Profesor {
         terminados[numero_tarea]++;
         V(mutex);
 
-        if (asignada[numero_tarea] == terminados[numero_tarea])
+        if (terminados[numero_tarea] == 5)
         {
-            P(mutex);
             orden++;
-            V(mutex);
-
-            otorgar_puntaje(orden);
-            for i = 1..asignada[numero_tarea]
+            puntaje_tarea[numero_tarea] = orden;
+            for i = 1..5
                 V(listo[numero_tarea]);
-
         }
     }
 }
-
 ```
 
 
@@ -582,7 +575,13 @@ Process Profesor {
 ```java
 sem barrera = 0;
 int cant_id[N] = ([N], 0);
-sem cantidad_piezas = T;
+int piezas_realizadas = 0;
+int restantes = 0;
+int contador = 0;
+int max = -1;
+int id_max = 1;
+sem mut = 1;
+
 
 Process Empleado[id: 1.. E]
 {   
@@ -593,38 +592,30 @@ Process Empleado[id: 1.. E]
     V(mutex);
     P(barrera);
 
-    while (true)
+    bool seguir = true;
+
+    P(mutex);
+    while (piezas_realizadas < T)
     {
-        if (not P(cantidad_piezas)) break; // Creo que no esta bien hacerlo de esta manera...
-        P(cantidad_piezas);
+        piezas_realizadas++;
+        V(mutex);
+
+        cant[id]++;
         --fabricar pieza;
 
         P(mutex);
-        cant_id[id]++;
-        V(mutex);
     }
-
-    P(mutex);
-        finalizado++
-        if (finalizado == E) 
-            V(terminado);
     V(mutex);
+
+    P(mut)
+    if cant_id[id] > max {
+        max = cant_id[id]; 
+        id_max = id;
+    }
+    V(mut);
+
 }
 
-
-
-Process Dia {
-    P(terminado);
-    int maximo = -1;
-    int id_max = 1;
-    for i: 1 to E {
-       if cant_id[i] > max {
-            max = cant_id[i]; 
-            id_max = i;
-       }
-    } 
-    informar_mayor_productor(id_max);
-}
 ```
 
 
@@ -707,7 +698,7 @@ sem Limite = 7;
 sem Trigo = 5;
 sem Maiz = 5;
 sem Disponible = 0;
-asignada[T+M] = ([T+N], 0);
+asignada[T+M] = ([T+M], 0);
 
 Cola c;
 
@@ -776,21 +767,21 @@ sem Maiz = 5;
 
 Process Camion[id: 0.. T+M]
 {
-    P(Limite);
-    if esTrigo() {
+    if esTrigo(id) {
         P(Trigo);
+        P(Limite);
         --descargar
         V(Trigo);
     }
-    else if esMaiz() 
+    else if esMaiz(id) 
     {
         P(Maiz);
+        P(Limite);
         --descargar
         V(Maiz);
     }
     V(Limite);
 }
-
 ```
 
 11)
@@ -807,12 +798,12 @@ Process Persona[id: 1..50]
     c.push(id);
     cantidad++;
 
-    if (cantidad == 5)
-    {
-        V(disponible);
+    if (cantidad == 5) {
         cantidad = 0;
+        V(disponible);
     }
     V(mutex);
+
     P(asignada[id])
 
 }
@@ -820,10 +811,13 @@ Process Persona[id: 1..50]
 Process Empleado 
 { while (atendidos <> 50)
     {
-        P(disponbile);
+        P(disponible);
         for i:= 1..5 
         {
+            P(mutex);
             id = c.pop();
+            V(mutex);
+
             atender_paciente(id);
             atendidos++;
             V(asignada[id]);
@@ -836,14 +830,12 @@ Process Empleado
 
 a)
 ```java
-cola c1;
-cola c2;
-cola c3;
+cola vc[1..3];
+
 cola colaEspera;
 asignada[1..3] = ([N], 0);
 asignados[1..150] = ([N], 0);
 sem mutex = 1;
-
 
 Process Pasajero[id: 1..150]
 {
@@ -857,27 +849,27 @@ Process Pasajero[id: 1..150]
 
 Process Recepcionista[]
 {
-    while true() {
+    while (true) {
         P(disponible);
+        P(mutex);
         id = colaEspera.pop();
+        V(mutex);
 
-        if (c1.size() < c2.size) && (c1.size() < c3.size()) {
-            P(mutex);
-            c1.add(id);
-            V(mutex);
-            asignada[1]++;
+        int pos;
+        int min = 999;
+
+        for (i: 1 to 3) {
+            if (vc[i].size() < min) {
+                pos = i;
+                min = vc[i].size();
+            }
         }
-        else if (c2.size() < c1.size()) && (c2.size() < c3.size()) {
-            P(mutex);
-            c2.add(id);
-            asignada[2]++;
-            V(mutex);
-        } else {
-            P(mutex);
-            c3.add(id);
-            asignada[3]++;
-            V(mutex);
-        }
+        P(mutex);
+        vc[pos].push(id);
+        V(mutex);
+
+        V(asignada[pos]);
+
     }
 }
 
@@ -886,10 +878,7 @@ Process Enfermera[id: 1..3]
 {
     while (true) {
         P(asignada[id]);
-
-        if id == 1: paciente = c1.pop()
-        if id == 2: paciente = c2.pop()
-        if id == 3: paciente = c3.pop()
+        paciente = vc[id].pop();
 
         Hisopar(paciente);
 
@@ -902,9 +891,7 @@ Process Enfermera[id: 1..3]
 b)
 
 ```java
-cola c1;
-cola c2;
-cola c3;
+cola vc[1..3];
 asignada[1..3] = ([N], 0);
 asignados[1..150] = ([N], 0);
 sem mutex = 1;
@@ -913,18 +900,20 @@ sem mutex = 1;
 Process Pasajero[id: 1..150]
 {
     P(mutex);
+    int min = 999;
+    int pos = 1;
 
-    if (c1.size() <= c2.size()) && (c1.size() <= c3.size()): 
-        c1.add(id)
-        V(asignada[1]);
-    else if (c2.size() <= c1.size()) && (c2.size() <= c3.size()): 
-        c2.add(id)
-        V(asignada[2]);
-    else: 
-        c3.add(id)
-        V(asignada[3]);
+    for (i: 1..3) {
+        if (vc[i].size() < min) {
+            min = vc[i].size();
+            pos = i;
+        }
+    }
+    vc[pos].push(id);
+    V(asignada[pos]);
 
     V(mutex);
+
 
     P(asignados[id]); // espera a ser atendido
 }
@@ -934,10 +923,7 @@ Process Enfermera[id: 1..3]
 {
     while (true) {
         P(asignada[id]);
-
-        if id == 1: paciente = c1.pop()
-        if id == 2: paciente = c2.pop()
-        if id == 3: paciente = c3.pop()
+        paciente = vc[id].pop();
 
         Hisopar(paciente);
 
