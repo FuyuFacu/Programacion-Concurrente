@@ -1,6 +1,4 @@
 Date: 2025-09-20
-Course: [[programacion_concurrente]]
-Tags: [[monitores]], [[Practica 3 (Concurrencia)]]
 
 # Enunciado
 En un **corralón de materiales** se deben atender a **N clientes** de acuerdo con el orden de llegada. Cuando un cliente es llamado para ser atendido, **entrega una lista con los productos que comprará**, y espera a que alguno de los empleados le entregue el comprobante de la compra realizada.
