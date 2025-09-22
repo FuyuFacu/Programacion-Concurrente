@@ -26,7 +26,7 @@ Monitor Corralon
     }
 
     procedure esperarCliente(out int idAux, out Lista productos) {
-        while (colaEspera.isEmpty()) 
+        if (colaEspera.isEmpty()) 
             wait(hayClientes);
         (idAux, productos) = pop(colaEspera);
     }
