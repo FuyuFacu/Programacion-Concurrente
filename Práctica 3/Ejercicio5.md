@@ -116,6 +116,7 @@ Monitor Corralon
     cond atendidos[N];
     Comprobante comprobantes[N];
     cond hayClientes;
+    int cantAtendidos;
     
     procedure entradaCliente(int id, Lista productos, out Comprobante c) {
         push(colaEspera, (id, productos));
@@ -124,14 +125,19 @@ Monitor Corralon
         c = comprobantes[id];
     }
     
-    procedure esperarCliente(out int idAux, out Lista productos) {
-        while (colaEspera.isEmpty()) 
-            wait(hayClientes);
-        (idAux, productos) = pop(colaEspera);
+    procedure esperarCliente(out int idAux, out Lista productos, out bool finAtencion) {
+        if (cantAtendidos == N)
+            finAtencion = true;
+        else {
+            while (colaEspera.isEmpty()) 
+                wait(hayClientes);
+            (idAux, productos) = pop(colaEspera);
+        }
     }
     
     procedure entregarComprobante(int id, Comprobante c) {
         comprobantes[id] = c;
+        cantAtendidos++;
         signal(atendidos[id]);
     }
 }
@@ -145,15 +151,20 @@ Process Cliente[id: 1..N]
 }
 
 Process Empleado[id: 1..E]
-{ while(true) 
+{
+    int idAux;
+    Lista productos;
+    Comprobante c;
+    bool finAtencion = false;
+
+    while(not finAtencion) 
     {
-        int idAux;
-        Lista productos;
-        Comprobante c;
-        
-        Corralon.esperarCliente(idAux, productos);
-        c = realizar_comprobante(productos);
-        Corralon.entregarComprobante(idAux, c);
+        Corralon.esperarCliente(idAux, productos, in finAtencion);
+        if (not finAtencion) {
+            c = realizar_comprobante(productos);
+            Corralon.entregarComprobante(idAux, c);
+        }
+
     }
 }
 ```
