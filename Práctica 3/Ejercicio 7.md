@@ -160,4 +160,4 @@ Process Repositor() {
 }
 ```
 
-Las diferencias que creo que hay entre ambas respuestas es que uno prioriza el orden en el que llegan los procesos por encima del otro. El que posee cola logra hacer bien el priorizar el orden de llegada, mientras que el otro.
+Las diferencias que creo que hay entre ambas respuestas es que uno prioriza el orden en el que llegan los procesos por encima del otro. El que posee cola logra hacer bien el priorizar el orden de llegada, mientras que el otro lo hace, pero en menor medida creo.
