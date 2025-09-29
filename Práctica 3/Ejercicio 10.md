@@ -14,6 +14,7 @@ Monitor Juego {
     bool horaLimpieza = false;
     cond liberado, hayCliente;
     cola c;
+    int atendidos = 0;
     
     procedure jugar(in int id) {
         push(c,id);
@@ -33,6 +34,7 @@ Monitor Juego {
             if (c.isEmpty()) wait(hayCliente);
             int idAux = c.pop();
             signal(asignado[idAux]);
+            atendidos++;
         }
     }
     
@@ -44,31 +46,34 @@ Monitor Juego {
     procedure finalizarLimpieza() {
         horaLimpieza = false;
         signal(completado);
+        if (atendidos == N)
+            finalizado = true;
     }
     
 }
 
 
 Process Persona[id: 1..N] {
-    while (true) {
-        Juego.jugar();
-        -- Usar_juego();
-        Juego.salir();
-    }
+    Juego.jugar(id);
+    -- Usar_juego();
+    Juego.salir();
 }
 
 Process Empleado {
-    while (true) {
+    bool finalizado = false;
+
+    while (finalizado == false) {
         Juego.limpiar(); // o algo asi antes de que una  persona lo use
         Desinfectar_juego();
-        Juego.finalizarLimpieza();
+        Juego.finalizarLimpieza(finalizado);
     }
 }
 
 Process contador {
-    while (true) {
+    bool finalizado = false
+    while (finalizado == false) {
         delay(10m)
-        Juego.hora_limpiar();
+        Juego.hora_limpiar(finalizado);
     }
 }
 ```
