@@ -41,7 +41,7 @@ Process Profesor {
         if (examen == "FINALIZAR") continuar = false
         else {
             nota = CorregirExamen(examen);
-            Alumno!recibir_nota(nota);
+            Alumno[id_alumno]!recibir_nota(nota);
         }
     }
 }
@@ -173,6 +173,7 @@ Process Profesor[id: 1..P]
     }
 }
 ```
+
 
 
 
